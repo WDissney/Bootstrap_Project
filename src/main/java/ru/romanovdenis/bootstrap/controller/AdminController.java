@@ -35,17 +35,17 @@ public class AdminController {
     }
     @PostMapping("/add")
     public String addUserInDb(@ModelAttribute("user") User user){
-        userService.addUser(user);
+        userService.save(user);
         return "redirect:/admin/usersAll";
     }
     @GetMapping("/edit/{id}")
     public String editUser(Model model, @PathVariable("id") Long id){
-        model.addAttribute("user", userService.getUserId(id));
+        model.addAttribute("user", userService.findById(id));
         return "edit";
     }
     @PostMapping("/updateUser")
     public String update (@ModelAttribute("user") User user){
-        userService.addUser(user);
+        userService.save(user);
         return "redirect:/admin/usersAll";
     }
 }

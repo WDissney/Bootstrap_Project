@@ -4,13 +4,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import ru.romanovdenis.bootstrap.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface UserService extends UserDetailsService {
 
     List<User> getAllUsers();
-    void addUser(User user);
+    User save(User user);
     void removeUser(Long id);
-    Object getUserId(Long id);
+    Optional<User> findById(Long id);
 
 }

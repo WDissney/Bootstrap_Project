@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "Users")
-
+@NamedEntityGraph(name = "User.roles", attributeNodes = @NamedAttributeNode("roles"))
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

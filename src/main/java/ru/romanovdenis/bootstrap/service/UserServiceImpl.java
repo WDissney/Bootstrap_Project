@@ -10,6 +10,7 @@ import ru.romanovdenis.bootstrap.model.User;
 import ru.romanovdenis.bootstrap.repositories.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -24,18 +25,17 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
     @Override
-    @Transactional
     public void removeUser(Long id){
         userRepository.deleteById(id);
     }
     @Override
-    @Transactional
-    public void addUser (User user){
+    public User save (User user){
         userRepository.save(user);
+        return user;
     }
     @Override
-    public Object getUserId(Long id){
-       return userRepository.getById(id);
+    public Optional<User> findById(Long id){
+       return userRepository.findById(id);
     }
 
     @Override
