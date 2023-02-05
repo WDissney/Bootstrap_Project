@@ -19,15 +19,14 @@ public class AdminController {
     }
 
     @GetMapping
-    public String showUsers (Model model){
-        model.addAttribute("users", userService.getAllUsers());
+    public String showUsers(){
         return "index";
     }
 
     @GetMapping ("/deleteUser/{id}")
     public String removeUser(@PathVariable("id") Long id){
         userService.removeUser(id);
-        return "redirect:/admin/usersAll";
+        return "redirect:/admin/";
     }
     @GetMapping("/addUser")
     public String addUserForm(@ModelAttribute("user") User user){
