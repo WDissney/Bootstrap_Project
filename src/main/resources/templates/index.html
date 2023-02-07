@@ -73,9 +73,6 @@
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td>
-
-                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -88,18 +85,18 @@
                             </div>
                             <div class="row">
                                 <div class="col-4 mx-auto text-center" >
+                                    <form name='formNewUser'>
+                                    <label class="control-label fw-bold">ID</label>
+                                    <input class="form-control mb-3" type="text" name="id">
 
-                                    <label for="form-Id-new" class="control-label fw-bold">ID</label>
-                                    <input class="form-control mb-3" type="text" id="form-Id-new">
+                                    <label class="control-label fw-bold">First name</label>
+                                    <input class="form-control mb-3" type="text" name="userName">
 
-                                    <label for="form-name-new" class="control-label fw-bold">First name</label>
-                                    <input class="form-control mb-3" type="text" id="form-name-new">
+                                    <label class="control-label fw-bold">Password</label>
+                                    <input class="form-control mb-4" type="text" name="password">
+                                    </form>
 
-                                    <label for="form-password-new" class="control-label fw-bold">Password</label>
-                                    <input class="form-control mb-4" type="text" id="form-password-new">
-
-
-                                        <div class="col-6 border px-2 mx-auto">
+                                        <div class="col-6 border px-2 mx-auto mb-3">
                                         <label for="role-new-user" class="fw-bold mb-2">Role</label>
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" value="" id="role-new-user">
@@ -114,7 +111,7 @@
                                             </label>
                                         </div>
                                         </div>
-
+                                    <button type="button" class="btn btn-success mb-3" onclick="saveUser()">Success</button>
 
                                 </div>
                             </div>
@@ -139,14 +136,16 @@
                         <div class="row">
                             <div class="col-6 mx-auto text-center" >
 
-                                <label for="form-Id" class="control-label fw-bold">ID</label>
-                                <input class="form-control mb-3" type="text" id="form-Id">
+                                <form name='editUser'>
+                                <label for="id" class="control-label fw-bold">ID</label>
+                                <input class="form-control mb-3" type="text" id="id" name="id">
 
-                                <label for="form-name" class="control-label fw-bold">First name</label>
-                                <input class="form-control mb-3" type="text" id="form-name">
+                                <label for="userName" class="control-label fw-bold">First name</label>
+                                <input class="form-control mb-3" type="text" id="userName" name="userName">
 
-                                <label for="form-password" class="control-label fw-bold">Password</label>
-                                <input class="form-control mb-4" type="text" id="form-password">
+                                <label for="password" class="control-label fw-bold">Password</label>
+                                <input class="form-control mb-4" type="text" id="password" name="password">
+                                </form>
 
                                 <div class="row border px-2">
                                     <label for="flexCheckDefault" class="fw-bold mb-2">Role</label>
@@ -190,6 +189,27 @@
         crossorigin="anonymous"></script>
 
 <script>
+
+    async function saveUser() {
+        let data = document.forms["formNewUser"]
+        let user = {
+            userName: data.elements["userName"].value,
+            password: data.elements["password"].value
+        }
+        console.log(user)
+        await fetch('/api/users', {
+            method: 'POST',
+            body: JSON.stringify(user),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
+        }).then((response) => response.json())
+            .then(()=> location.href='/admin')
+            .then((data) => {
+                console.log(data)
+            })
+    }
+
     async function getUsers() {
         const response = await fetch("/api/users", {
             method: "GET",
@@ -216,7 +236,8 @@
                 tr.append(passTd);
 
                 const roleTd = document.createElement("td")
-                var x = "";
+                let x = "";
+                let i;
                 for (i = 0; i < user.roles.length; i++) {
                     x += user.roles[i].role+" ";
                 }
@@ -231,6 +252,9 @@
                 buttonEdit.setAttribute("data-bs-toggle", "modal")
                 buttonEdit.setAttribute("data-bs-target","#editUser")
                 buttonEdit.append("Edit")
+                buttonEdit.addEventListener("click", e =>{
+                    editUser(user.id)
+                })
                 linkEdit.append(buttonEdit)
                 tr.append(linkEdit)
 
@@ -252,15 +276,15 @@
         }
     }
     getUsers()
-    // Удаление пользователя
    async function remove(id) {
-        fetch("/api/users/" + id, {
+        await fetch("/api/users/" + id, {
             method: "DELETE"
         }).then(() => {
             console.log('removed');
         }).catch(err => {
             console.error(err)
-        }).then(() => location.reload());
+        }).then()
+
     }
 
     function goToUser(){
@@ -269,7 +293,33 @@
         }).then(() => location.href="/api/users/1")
     }
 
+     async function editUser(id) {
+         const response = await fetch(`/api/users/`+id, {
+             method: 'GET',
+             headers: {
+                 'Accept': 'application/json',
+                 'Content-Type': 'application/json'
+             },
+         })
+             if (response.ok === true){
+                 let user = {
+                     'id': '3',
+                     'userName': `zinna`,
+                     'password': 'ddddd'
+                 }
+                 // let user = response.json();
+                 let modal = document.forms["editUser"]
+                 modal.elements['id'].setValue(user.id)
+                 modal.elements['userName'].setValue(user.userName)
+                 modal.elements['password'].setValue(user.password)
+             }
+             // .then((x) => x.json())
+             // .catch(error => console.error('Unable to update item.', error));
+     }
+
 </script>
+
+
 </body>
 
 </html>

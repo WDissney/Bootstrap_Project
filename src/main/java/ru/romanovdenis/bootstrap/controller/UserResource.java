@@ -46,4 +46,10 @@ public class UserResource {
         userService.removeUser(id);
         return "User id = "+id+" delete";
     }
+
+    @PostMapping
+    public User saveUser(@RequestBody User user){
+        userService.save(user);
+        return user;
+    }
 }
