@@ -72,8 +72,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                </tr>
+
                                 </tbody>
                             </table>
                         </div>
@@ -84,7 +83,7 @@
                                 <h5>Add new user</h5>
                             </div>
                             <div class="row">
-                                <div class="col-4 mx-auto text-center" >
+                                <div class="col-2 mx-auto text-center" >
                                     <form name='formNewUser'>
                                     <label class="control-label fw-bold">ID</label>
                                     <input class="form-control mb-3" type="text" name="id">
@@ -99,15 +98,15 @@
                                         <div class="col-6 border px-2 mx-auto mb-3">
                                         <label for="role-new-user" class="fw-bold mb-2">Role</label>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" id="role-new-user">
+                                            <input class="form-check-input" type="checkbox" value="ROLE_USER" id="role-new-user">
                                             <label class="form-check-label" for="role-new-user">
-                                                ROLE_USER
+                                                USER
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" id="role-new-admin" checked>
+                                            <input class="form-check-input" type="checkbox" value="ROLE_ADMIN" id="role-new-admin" checked>
                                             <label class="form-check-label" for="role-new-admin">
-                                                ROLE_ADMIN
+                                                ADMIN
                                             </label>
                                         </div>
                                         </div>
@@ -283,7 +282,7 @@
             console.log('removed');
         }).catch(err => {
             console.error(err)
-        }).then()
+        }).then(()=> document.querySelector("tr[data-id='"+id+"']").remove())
 
     }
 
@@ -316,6 +315,9 @@
              // .then((x) => x.json())
              // .catch(error => console.error('Unable to update item.', error));
      }
+
+
+
 
 </script>
 
