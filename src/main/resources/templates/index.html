@@ -24,8 +24,6 @@
     </nav>
 </header>
 
-
-<section>
     <div class="container-fluid">
 
         <div class="row g-1">
@@ -97,24 +95,24 @@
 
                                         <div class="col-6 border px-2 mx-auto mb-3">
                                         <label for="role-new-user" class="fw-bold mb-2">Role</label>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="ROLE_USER" id="role-new-user">
+                                        <div class="form-check1">
+                                            <input class="form-check-input" type="checkbox" value="ROLE_USER" id="role-new-user" checked>
                                             <label class="form-check-label" for="role-new-user">
                                                 USER
                                             </label>
                                         </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="ROLE_ADMIN" id="role-new-admin" checked>
+                                        <div class="form-check1">
+                                            <input class="form-check-input" type="checkbox" value="ROLE_ADMIN" id="role-new-admin">
                                             <label class="form-check-label" for="role-new-admin">
                                                 ADMIN
                                             </label>
                                         </div>
                                         </div>
-                                    <button type="button" class="btn btn-success mb-3" onclick="saveUser()">Success</button>
+
+                                    <button type="button" class="btn btn-success mb-3" onclick="saveUser()" href="#home">Success</button>
 
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -134,18 +132,15 @@
 
                         <div class="row">
                             <div class="col-6 mx-auto text-center" >
+                                <form name="editUser">
+                                <label for="userIdEdit" class="control-label fw-bold">ID</label>
+                                <input class="form-control mb-3" type="number" id="userIdEdit" name="userIdEdit">
 
-                                <form name='editUser'>
-                                <label for="id" class="control-label fw-bold">ID</label>
-                                <input class="form-control mb-3" type="text" id="id" name="id">
+                                <label for="userNameEdit" class="control-label fw-bold">First name</label>
+                                <input class="form-control mb-3" type="text" id="userNameEdit" name="userNameEdit">
 
-                                <label for="userName" class="control-label fw-bold">First name</label>
-                                <input class="form-control mb-3" type="text" id="userName" name="userName">
-
-                                <label for="password" class="control-label fw-bold">Password</label>
-                                <input class="form-control mb-4" type="text" id="password" name="password">
-                                </form>
-
+                                <label for="userPasswordEdit" class="control-label fw-bold">Password</label>
+                                <input class="form-control mb-4" type="text" id="userPasswordEdit" name="userPasswordEdit">
                                 <div class="row border px-2">
                                     <label for="flexCheckDefault" class="fw-bold mb-2">Role</label>
                                     <div class="form-check">
@@ -161,22 +156,19 @@
                                         </label>
                                     </div>
                                 </div>
-
+                                </form>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Edit</button>
+                        <button id="userEditButton" type="button" class="btn btn-primary">Edit</button>
                     </div>
-
                 </div>
-
             </div>
         </div>
     </div>
     <!--Modal-->
-</section>
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -189,12 +181,34 @@
 
 <script>
 
+    getAllUsers()
     async function saveUser() {
+        let getRoles = [];
+        let rolesCheckUser = document.querySelector("input[id='role-new-user']")
+        let rolesCheckAdmin = document.querySelector("input[id='role-new-admin']")
+
+        if (rolesCheckUser.checked){
+            getRoles.push({
+                id: 1,
+                role: "USER_ROLE",
+                authority: "USER_ROLE"
+            })
+        }
+        if (rolesCheckAdmin.checked){
+            getRoles.push({
+                id: 2,
+                role: "ADMIN_ROLE",
+                authority: "ADMIN_ROLE"
+            })
+        }
+        console.log(getRoles)
         let data = document.forms["formNewUser"]
         let user = {
             userName: data.elements["userName"].value,
-            password: data.elements["password"].value
+            password: data.elements["password"].value,
+            roles: getRoles
         }
+
         console.log(user)
         await fetch('/api/users', {
             method: 'POST',
@@ -203,79 +217,27 @@
                 'Content-type': 'application/json; charset=UTF-8',
             },
         }).then((response) => response.json())
-            .then(()=> location.href='/admin')
+            .then((response) => addUserInTable(response))
+            .then(()=> location.href="#home")
             .then((data) => {
                 console.log(data)
             })
     }
 
-    async function getUsers() {
+    async function getAllUsers() {
         const response = await fetch("/api/users", {
             method: "GET",
-            headers: { "Accept": "application/json" }
+            headers: {"Accept": "application/json"}
         });
         if (response.ok === true) {
             const users = await response.json();
-            let rows = document.querySelector("tbody");
             users.forEach(user => {
-
-                const tr = document.createElement("tr");
-                tr.setAttribute("data-id", user.id);
-
-                const idTd = document.createElement("td");
-                idTd.append(user.id);
-                tr.append(idTd);
-
-                const nameTd = document.createElement("td");
-                nameTd.append(user.username);
-                tr.append(nameTd);
-
-                const passTd = document.createElement("td");
-                passTd.append(user.password);
-                tr.append(passTd);
-
-                const roleTd = document.createElement("td")
-                let x = "";
-                let i;
-                for (i = 0; i < user.roles.length; i++) {
-                    x += user.roles[i].role+" ";
-                }
-                roleTd.append(x)
-                tr.append(roleTd)
-
-                const linkEdit = document.createElement("td")
-                const buttonEdit = document.createElement("button")
-                buttonEdit.setAttribute("id", user.id)
-                buttonEdit.setAttribute("class", "btn btn-info")
-                buttonEdit.setAttribute("type", "button")
-                buttonEdit.setAttribute("data-bs-toggle", "modal")
-                buttonEdit.setAttribute("data-bs-target","#editUser")
-                buttonEdit.append("Edit")
-                buttonEdit.addEventListener("click", e =>{
-                    editUser(user.id)
-                })
-                linkEdit.append(buttonEdit)
-                tr.append(linkEdit)
-
-                const linkDelete = document.createElement("td")
-                const buttonDelete = document.createElement("button")
-                buttonDelete.setAttribute("id", user.id)
-                buttonDelete.setAttribute("class", "btn btn-danger")
-                buttonDelete.setAttribute("type", "button")
-                buttonDelete.append("Delete")
-                buttonDelete.addEventListener("click", e => {
-                    remove(user.id)
-                });
-
-                linkDelete.append(buttonDelete)
-                tr.append(linkDelete)
-
-                rows.append(tr)
+                addUserInTable(user)
             });
         }
     }
-    getUsers()
-   async function remove(id) {
+
+    async function remove(id) {
         await fetch("/api/users/" + id, {
             method: "DELETE"
         }).then(() => {
@@ -286,37 +248,106 @@
 
     }
 
-    function goToUser(){
+    function goToUser() {
         fetch("/api/users/1", {
             method: "GET"
-        }).then(() => location.href="/api/users/1")
+        }).then(() => location.href = "/api/users/1")
     }
 
-     async function editUser(id) {
-         const response = await fetch(`/api/users/`+id, {
-             method: 'GET',
-             headers: {
-                 'Accept': 'application/json',
-                 'Content-Type': 'application/json'
-             },
-         })
-             if (response.ok === true){
-                 let user = {
-                     'id': '3',
-                     'userName': `zinna`,
-                     'password': 'ddddd'
-                 }
-                 // let user = response.json();
-                 let modal = document.forms["editUser"]
-                 modal.elements['id'].setValue(user.id)
-                 modal.elements['userName'].setValue(user.userName)
-                 modal.elements['password'].setValue(user.password)
-             }
-             // .then((x) => x.json())
-             // .catch(error => console.error('Unable to update item.', error));
-     }
+    async function getUser(id) {
+        const response = await fetch(`/api/users/` + id, {
+            method: 'GET',
+        })
+        if (response.ok === true) {
+            const user = await response.json();
+            console.log(user)
+            console.log(user)
+            document.getElementById('userIdEdit').setAttribute("value", user.id)
+            document.getElementById('userNameEdit').setAttribute("value", user.userName)
+            document.getElementById('userPasswordEdit').setAttribute("value", user.password)
+            document.getElementById('userEditButton').addEventListener("click", () => {
+                editUser()
+            })
+        }
+    }
 
+    async function editUser() {
+        let data = document.forms["editUser"]
+        let user = {
+            id: data.elements["userIdEdit"].value,
+            userName: data.elements["userNameEdit"].value,
+            password: data.elements["userPasswordEdit"].value
+        }
+        console.log(user)
+        await fetch('/api/users', {
+            method: 'PUT',
+            body: JSON.stringify(user),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
+        }).then((response) => response.json())
+            .then((response)=> console.log(response))
+            .then(()=> addUserInTable(user))
+            .then((data) => {
+                console.log(data)
+            })
+    }
 
+    function addUserInTable(user){
+        let rows = document.querySelector("tbody");
+        const tr = document.createElement("tr");
+        tr.setAttribute("data-id", user.id);
+
+        const idTd = document.createElement("td");
+        idTd.append(user.id);
+        tr.append(idTd);
+
+        const nameTd = document.createElement("td");
+        nameTd.append(user.userName);
+        tr.append(nameTd);
+
+        const passTd = document.createElement("td");
+        passTd.append(user.password);
+        tr.append(passTd);
+
+        const roleTd = document.createElement("td")
+        let x = "";
+        let i;
+        for (i = 0; i < user.roles.length; i++) {
+            x += user.roles[i].role+" "
+        }
+
+        roleTd.append(x)
+        tr.append(roleTd)
+
+        const linkEdit = document.createElement("td")
+        const buttonEdit = document.createElement("button")
+        buttonEdit.setAttribute("class", "btn btn-info")
+        buttonEdit.setAttribute("type", "button")
+        buttonEdit.setAttribute("data-bs-toggle", "modal")
+        buttonEdit.setAttribute("data-bs-target", "#editUser")
+        buttonEdit.append("Edit")
+        buttonEdit.addEventListener("click", () => {
+            getUser(user.id)
+        })
+        linkEdit.append(buttonEdit)
+        tr.append(linkEdit)
+
+        const linkDelete = document.createElement("td")
+        const buttonDelete = document.createElement("button")
+        buttonDelete.setAttribute("id", user.id)
+        buttonDelete.setAttribute("class", "btn btn-danger")
+        buttonDelete.setAttribute("type", "button")
+        buttonDelete.append("Delete")
+        buttonDelete.addEventListener("click", () => {
+            remove(user.id)
+        });
+
+        linkDelete.append(buttonDelete)
+        tr.append(linkDelete)
+
+        rows.append(tr)
+    }
 
 
 </script>

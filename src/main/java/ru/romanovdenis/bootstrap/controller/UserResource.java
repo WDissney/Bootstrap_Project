@@ -52,4 +52,10 @@ public class UserResource {
         userService.save(user);
         return user;
     }
+
+    @PutMapping
+    public User updateUser(@RequestBody User user){
+        userService.save(user);
+        return user;
+    }
 }
