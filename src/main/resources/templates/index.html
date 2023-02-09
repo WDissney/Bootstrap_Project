@@ -44,16 +44,16 @@
 
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-show-tab"
                                 type="button" role="tab" aria-controls="home" aria-selected="true">User Table</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
+                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-show-tab"
                                 type="button" role="tab" aria-controls="profile" aria-selected="false">New User</button>
                     </li>
                 </ul>
                 <div class="tab-content border" id="myTabContent">
-                    <div class="tab-pane fade show active border-dark" id="home" role="tabpanel"
+                    <div class="tab-pane fade show active border-dark" id="home-show-tab" role="tabpanel"
                          aria-labelledby="home-tab">
                         <h3 style="margin-left: 5mm; margin-top: 3mm;">All users</h3>
                         <div class="container" style="padding: 7mm;">
@@ -75,7 +75,7 @@
                             </table>
                         </div>
                     </div>
-                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="tab-pane fade" id="profile-show-tab" role="tabpanel" aria-labelledby="profile-tab">
                         <div class="container-fluid ">
                             <div class="row">
                                 <h5>Add new user</h5>
@@ -109,7 +109,7 @@
                                         </div>
                                         </div>
 
-                                    <button type="button" class="btn btn-success mb-3" onclick="saveUser()" href="#home">Success</button>
+                                    <button type="button" id="save-user-tab" class="btn btn-success mb-3" onclick="saveUser()">Success</button>
 
                                 </div>
                             </div>
@@ -142,16 +142,16 @@
                                 <label for="userPasswordEdit" class="control-label fw-bold">Password</label>
                                 <input class="form-control mb-4" type="text" id="userPasswordEdit" name="userPasswordEdit">
                                 <div class="row border px-2">
-                                    <label for="flexCheckDefault" class="fw-bold mb-2">Role</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                                        <label class="form-check-label" for="flexCheckDefault">
+                                    <label for="modal-check" class="fw-bold mb-2">Role</label>
+                                    <div class="form-check" id="modal-check">
+                                        <input class="form-check-input" type="checkbox" value="ROLE_USER" id="modal-check-user">
+                                        <label class="form-check-label" for="modal-check-user">
                                             ROLE_USER
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
-                                        <label class="form-check-label" for="flexCheckChecked">
+                                        <input class="form-check-input" type="checkbox" value="ROLE_ADMIN" id="modal-check-admin">
+                                        <label class="form-check-label" for="modal-check-admin">
                                             ROLE_ADMIN
                                         </label>
                                     </div>
@@ -201,14 +201,12 @@
                 authority: "ADMIN_ROLE"
             })
         }
-        console.log(getRoles)
         let data = document.forms["formNewUser"]
         let user = {
             userName: data.elements["userName"].value,
             password: data.elements["password"].value,
             roles: getRoles
         }
-
         console.log(user)
         await fetch('/api/users', {
             method: 'POST',
@@ -217,11 +215,20 @@
                 'Content-type': 'application/json; charset=UTF-8',
             },
         }).then((response) => response.json())
-            .then((response) => addUserInTable(response))
-            .then(()=> location.href="#home")
+            .then(() => {
+                    document.getElementById('profile-tab').setAttribute('class', 'nav-link')
+                    document.getElementById('home-tab').setAttribute('class', 'nav-link active')
+                    document.getElementById('profile-show-tab').setAttribute('class', 'tab-pane fade')
+                    document.getElementById('home-show-tab').setAttribute('class', 'tab-pane fade show active border-dark')
+                    getAllUsers()
+            })
+            .then(()=>{
+                document.querySelector("form[name='formNewUser']").reset()
+            })
             .then((data) => {
                 console.log(data)
             })
+
     }
 
     async function getAllUsers() {
@@ -230,9 +237,10 @@
             headers: {"Accept": "application/json"}
         });
         if (response.ok === true) {
+            document.querySelector('tbody').innerHTML = " "
             const users = await response.json();
             users.forEach(user => {
-                addUserInTable(user)
+                (addUserInTable(user))
             });
         }
     }
@@ -254,14 +262,20 @@
         }).then(() => location.href = "/api/users/1")
     }
 
-    async function getUser(id) {
-        const response = await fetch(`/api/users/` + id, {
-            method: 'GET',
-        })
+    async function getUserForEdit(id) {
+        let user;
+        const response = await fetch("/api/users/"+id, {
+            method: "GET",
+            headers: {"Accept": "application/json"}
+        });
         if (response.ok === true) {
-            const user = await response.json();
-            console.log(user)
-            console.log(user)
+            user = await response.json();
+            if (user.roles.map(r => r.role).includes("ROLE_USER")){
+                document.getElementById('modal-check-user').setAttribute("checked", " ")
+            }
+            if(user.roles.map(r => r.role).includes("ROLE_ADMIN")){
+                document.getElementById('modal-check-admin').setAttribute("checked", " ")
+            }
             document.getElementById('userIdEdit').setAttribute("value", user.id)
             document.getElementById('userNameEdit').setAttribute("value", user.userName)
             document.getElementById('userPasswordEdit').setAttribute("value", user.password)
@@ -272,11 +286,30 @@
     }
 
     async function editUser() {
+        let getRoles = [];
+        let rolesCheckUser = document.querySelector("input[id='modal-check-user']")
+        let rolesCheckAdmin = document.querySelector("input[id='modal-check-admin']")
+
+        if (rolesCheckUser.checked){
+            getRoles.push({
+                id: 1,
+                role: "USER_ROLE",
+                authority: "USER_ROLE"
+            })
+        }
+        if (rolesCheckAdmin.checked){
+            getRoles.push({
+                id: 2,
+                role: "ADMIN_ROLE",
+                authority: "ADMIN_ROLE"
+            })
+        }
         let data = document.forms["editUser"]
         let user = {
             id: data.elements["userIdEdit"].value,
             userName: data.elements["userNameEdit"].value,
-            password: data.elements["userPasswordEdit"].value
+            password: data.elements["userPasswordEdit"].value,
+            roles: getRoles
         }
         console.log(user)
         await fetch('/api/users', {
@@ -287,27 +320,27 @@
             },
         }).then((response) => response.json())
             .then((response)=> console.log(response))
-            .then(()=> addUserInTable(user))
+            .then(()=> getAllUsers())
             .then((data) => {
                 console.log(data)
             })
     }
 
     function addUserInTable(user){
-        let rows = document.querySelector("tbody");
+        const tbody = document.querySelector("tbody")
         const tr = document.createElement("tr");
         tr.setAttribute("data-id", user.id);
 
         const idTd = document.createElement("td");
-        idTd.append(user.id);
+        idTd.innerHTML=(user.id);
         tr.append(idTd);
 
         const nameTd = document.createElement("td");
-        nameTd.append(user.userName);
+        nameTd.innerHTML=(user.userName);
         tr.append(nameTd);
 
         const passTd = document.createElement("td");
-        passTd.append(user.password);
+        passTd.innerHTML=(user.password);
         tr.append(passTd);
 
         const roleTd = document.createElement("td")
@@ -317,7 +350,7 @@
             x += user.roles[i].role+" "
         }
 
-        roleTd.append(x)
+        roleTd.innerHTML= x
         tr.append(roleTd)
 
         const linkEdit = document.createElement("td")
@@ -328,7 +361,7 @@
         buttonEdit.setAttribute("data-bs-target", "#editUser")
         buttonEdit.append("Edit")
         buttonEdit.addEventListener("click", () => {
-            getUser(user.id)
+            getUserForEdit(user.id)
         })
         linkEdit.append(buttonEdit)
         tr.append(linkEdit)
@@ -346,7 +379,8 @@
         linkDelete.append(buttonDelete)
         tr.append(linkDelete)
 
-        rows.append(tr)
+        tbody.append(tr)
+        return tr
     }
 
 
