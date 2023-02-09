@@ -33,7 +33,7 @@
 
                     <button class="p-2 btn btn-primary mt-4" type="button">Admin</button>
 
-                    <button id="goToUser" class="p-2 btn btn-primary" type="button" onclick="goToUser()">User</button>
+                    <button id="goToUser" class="p-2 btn btn-primary" type="button" onclick="document.location='/user'">User</button>
 
                 </div>
             </div>
@@ -252,12 +252,6 @@
             console.error(err)
         }).then(()=> document.querySelector("tr[data-id='"+id+"']").remove())
 
-    }
-
-    function goToUser() {
-        fetch("/api/users/1", {
-            method: "GET"
-        }).then(() => location.href = "/api/users/1")
     }
 
     async function getUserForEdit(id) {

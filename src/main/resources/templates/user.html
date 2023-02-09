@@ -1,11 +1,111 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
-<head>
-    <title>Spring Security Example</title>
-</head>
-<body>
-<h1>User, welcome spring boot security page!</h1>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+
+<body>
+<header>
+    <nav class="navbar navbar-default bg-dark text-white">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a href="#" class="navbar-brand text-white">User</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<div class="container-fluid">
+
+    <div class="row g-1">
+        <div class="col-2" style="height: 915px; background-color: rgb(255, 255, 255);">
+            <div class="container" style="padding: 7mm;">
+
+            </div>
+            <div class="d-grid gap-4">
+
+                <button id="goToUser" class="p-2 btn btn-primary" type="button" onclick="goToUser()">User</button>
+
+            </div>
+        </div>
+
+
+        <div class="col-10">
+            <div class="container-fluid mx-7mm my-7mm border">
+
+                <h1 style="margin: 7mm;">User Info</h1>
+
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Password</th>
+                        <th scope="col">Role</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous">
+</script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT"
+        crossorigin="anonymous"></script>
+
+<script>
+    getUser()
+    async function getUser() {
+        const response = await fetch("/api/auth", {
+            method: "GET",
+            headers: {"Accept": "application/json"}
+        });
+        if (response.ok === true) {
+            const user = await response.json();
+            const tbody = document.querySelector("tbody")
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-id", user.id);
+
+            const idTd = document.createElement("td");
+            idTd.innerHTML=(user.id);
+            tr.append(idTd);
+
+            const nameTd = document.createElement("td");
+            nameTd.innerHTML=(user.userName);
+            tr.append(nameTd);
+
+            const passTd = document.createElement("td");
+            passTd.innerHTML=(user.password);
+            tr.append(passTd);
+
+            const roleTd = document.createElement("td")
+            let x = "";
+            let i;
+            for (i = 0; i < user.roles.length; i++) {
+                x += user.roles[i].role+" "
+            }
+            roleTd.innerHTML= x
+            tr.append(roleTd)
+            tbody.append(tr)
+        }
+    }
+</script>
 
 </body>
 </html>
