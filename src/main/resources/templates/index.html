@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -159,8 +159,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button id="userEditButton" type="button" class="btn btn-primary">Edit</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button id="userEditButton" type="button" class="btn btn-primary" data-bs-dismiss="modal">Edit</button>
                     </div>
                 </div>
             </div>
@@ -272,7 +272,7 @@
             document.getElementById('userNameEdit').setAttribute("value", user.userName)
             document.getElementById('userPasswordEdit').setAttribute("value", user.password)
             document.getElementById('userEditButton').addEventListener("click", () => {
-                editUser()
+                editUser();
             })
         }
     }
