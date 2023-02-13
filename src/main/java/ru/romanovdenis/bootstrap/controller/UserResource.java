@@ -23,38 +23,49 @@ public class UserResource {
     }
 
     @GetMapping("/users/{id}")
-    @ResponseBody
-    public ResponseEntity<User> findById(@PathVariable Long id) {
+    public ResponseEntity<String> findById(@PathVariable Long id) {
         try {
-            User user = userService.findById(id).orElseThrow();
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            User user = userService.findById(id).orElseThrow(UserNotFoundException::new);
+            return new ResponseEntity<>(user.toString(), HttpStatus.OK);
+        } catch (UserNotFoundException e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
     @GetMapping("/users")
-    @ResponseBody
-    public List<User> allUsers(){
-        return userService.getAllUsers();
+    public ResponseEntity<List<User>> allUsers(){
+        List<User> users = userService.getAllUsers();
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
 
     @DeleteMapping("/users/{id}")
-    public String deleteUser(@PathVariable Long id){
-        userService.removeUser(id);
-        return "User id = "+id+" delete";
+    public ResponseEntity<Long> deleteUser(@PathVariable Long id){
+        try {
+            userService.removeUser(id);
+            return new ResponseEntity<>(id, HttpStatus.OK);
+        } catch (Exception e){
+            return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping("/users")
-    public User saveUser(@RequestBody User user){
-        userService.save(user);
-        return user;
+    public ResponseEntity<User> saveUser(@RequestBody User user){
+        try {
+            userService.save(user);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (Exception e){
+            return new ResponseEntity<>(user, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/users")
-    public User updateUser(@RequestBody User user){
-        userService.save(user);
-        return user;
+    public ResponseEntity<User> updateUser(@RequestBody User user){
+        try{
+            userService.save(user);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(user, HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/auth")
